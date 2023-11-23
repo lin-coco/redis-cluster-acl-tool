@@ -1,0 +1,48 @@
+kind: pipeline
+type: kubernetes
+name: tag
+trigger:
+  branch:
+    - master
+image_pull_secrets:
+  - syndra-harbor
+steps:
+  - name: fetchtag
+    image: alpine/git
+    commands:
+      - git fetch origin --tags
+      - echo "$(git log -1 --pretty=format:%an ${DRONE_COMMIT})" > commit.txt
+      - cat commit.txt
+  - name: autotag
+    image: harbor.syndra.space/syndra/autotag:latest
+    privileged: true
+    pull: always
+    commands:
+      - cat commit.txt
+      - autotag -s "conventional" -v
+      - git push origin --tags
+---
+kind: pipeline
+type: kubernetes
+name: redis-cluster-acl-tool
+trigger:
+  ref:
+    - refs/tags/*
+image_pull_secrets:
+  - syndra-harbor
+steps:
+  - name: DockerImage
+    image: plugins/docker
+    privileged: true
+    settings:
+      dockerfile: Dockerfile
+      registry: harbor.syndra.space
+      repo: harbor.syndra.space/syndra/redis-cluster-acl-tool
+      tags:
+        - ${DRONE_TAG}
+        - latest
+      username:
+        from_secret: harbor_username
+      password:
+        from_secret: harbor_password
+      custom_dns: 119.29.29.29
