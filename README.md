@@ -12,7 +12,7 @@ redis集群acl管理工具
 ```shell
 go run main.go -a 10.233.127.68:6379 -p 123456 -c "acl list"
 # make all
-# ./acltool -a 10.233.127.68:6379 -p 123456 -c "acl list" 
+# ./acltool -a 10.233.127.68:6379 -p 123456 -c "acl list"
 ```
 
 1. -a为地址请改成自己的集群中一个node地址
